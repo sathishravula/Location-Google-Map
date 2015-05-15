@@ -11,11 +11,11 @@ public class Test {
     System.out.println("current date:" + date);
     System.out.println("current date:" + date.getTime());
     int day = date.getDate();
-    date.setDate(31);
+    date.setDate(17);
     date.setHours(12);
     date.setMinutes(0);
     date.setSeconds(0);
-    System.out.println("   next date:" + date);
+    System.out.println("   next date:" + date.getDay());
     System.out.println("   next date:" + date.getTime());
 
     day = date.getDate();

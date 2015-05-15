@@ -18,9 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created by ehc on 15/5/15.
@@ -71,13 +69,13 @@ public class HelperClass {
   }
 
 
-  public static Date getTemperatureAlarmStartTime(Date date,boolean flag) {
+  public static Date getTemperatureAlarmStartTime(Date date, boolean flag) {
     int hour = 8;
     int day = date.getDate();
     switch (date.getHours()) {
-      case 16:
-        if(date.getMinutes()>50 || flag)
-        day = day + 1;
+      case 8:
+        if (date.getMinutes() > 50 || flag)
+          day = day + 1;
         break;
       case 9:
       case 10:
@@ -86,6 +84,7 @@ public class HelperClass {
       case 13:
       case 14:
       case 15:
+      case 16:
       case 17:
       case 18:
       case 19:
@@ -104,7 +103,7 @@ public class HelperClass {
   }
 
   public static int getQuantity(Date date) {
-    int quantity=1;
+    int quantity = 1;
     switch (date.getHours()) {
       case 8:
         break;
@@ -113,29 +112,29 @@ public class HelperClass {
         break;
       case 11:
       case 12:
-        quantity=1;
+        quantity = 1;
         break;
       case 13:
       case 14:
-        quantity=2;
+        quantity = 2;
         break;
       case 15:
       case 16:
-        quantity=3;
+        quantity = 3;
         break;
       case 17:
       case 18:
-        quantity=4;
+        quantity = 4;
         break;
       case 19:
       case 20:
-        quantity=5;
+        quantity = 5;
         break;
       case 21:
-        quantity=6;
+        quantity = 6;
         break;
     }
-    return  quantity;
+    return quantity;
   }
 
   public static void setAlarm(Context mContext, int requestCode, long startTime, long interval, boolean flag) {
@@ -267,5 +266,4 @@ public class HelperClass {
     }
     return stringBuffer.toString();
   }
-
 }

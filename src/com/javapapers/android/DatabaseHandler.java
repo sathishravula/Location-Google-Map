@@ -76,7 +76,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
   private Date getDate(String date) {
     SimpleDateFormat dateFormat = new SimpleDateFormat(
-        "MM-dd-yyyy", Locale.getDefault());
+        "yyyy-MM-dd");
     try {
       return dateFormat.parse(date);
     } catch (ParseException e) {
@@ -87,15 +87,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
   public static String getDateInString() {
     SimpleDateFormat dateFormat = new SimpleDateFormat(
-//        "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         "yyyy-MM-dd", Locale.getDefault());
     Date date = new Date();
     return dateFormat.format(date);
   }
 
-  public ArrayList<HydroCare> getAllSMS() {
-    ArrayList<HydroCare> smsArrayList = new ArrayList<HydroCare>();
-    String selectQuery = "SELECT  * FROM " + TABLE_HYDROCARE;
+  public ArrayList<HydroCare> getCurrentWeek() {
+    ArrayList<HydroCare> hydroCares = new ArrayList<HydroCare>();
+    int weekday = getWeekDay();
+    String selectQuery = "SELECT  * FROM " + TABLE_HYDROCARE + " where " + DATE_OF_ENTRY + " between date('now','localtime','-" + weekday + " days') and date('now','localtime')";
     SQLiteDatabase db = this.getWritableDatabase();
     Cursor cursor = db.rawQuery(selectQuery, null);
     if (cursor.moveToFirst()) {
@@ -106,21 +106,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         hydroCare.setInTake(cursor.getDouble(2));
         hydroCare.setTemperature(cursor.getDouble(3));
         hydroCare.setStatus(cursor.getInt(4));
-        smsArrayList.add(hydroCare);
+        hydroCares.add(hydroCare);
       } while (cursor.moveToNext());
     }
     cursor.close();
-    return smsArrayList;
-  }
-
-
-  public int getOverAllSMSCount() {
-    String selectQuery = "SELECT  * FROM " + TABLE_HYDROCARE + " where status=1";
-    SQLiteDatabase db = this.getWritableDatabase();
-    Cursor cursor = db.rawQuery(selectQuery, null);
-    int count = cursor.getCount();
-    cursor.close();
-    return count;
+    return hydroCares;
   }
 
   public int updateStatus(String date, int status) {
@@ -140,8 +130,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
   }
 
   public Double getInTake(String date) {
-    String selectQuery = "SELECT  * FROM " + TABLE_HYDROCARE + "  where " + DATE_OF_ENTRY
-        + " between datetime(julianday(date('now','localtime'))) and datetime('now','localtime') AND status=1";
     SQLiteDatabase db = this.getWritableDatabase();
     Cursor cursor = db.query(TABLE_HYDROCARE, new String[]{INTAKE}, DATE_OF_ENTRY + " = ?",
         new String[]{date}, null, null, null, null);
@@ -158,17 +146,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     db.delete(TABLE_HYDROCARE, "where STATUS = ?", new String[]{String.valueOf(1)});
   }
 
-  public int getTodaySms() {
-    String selectQuery = "SELECT  * FROM " + TABLE_HYDROCARE + "  where " + DATE_OF_ENTRY
-        + " between datetime(julianday(date('now','localtime'))) and datetime('now','localtime') AND status=1";
-    SQLiteDatabase db = this.getWritableDatabase();
-    Cursor cursor = db.rawQuery(selectQuery, null);
-    return cursor.getCount();
-  }
-
   public HydroCare getToDayEntry(String date) {
     SQLiteDatabase db = this.getWritableDatabase();
-    Cursor cursor = db.query(TABLE_HYDROCARE, new String[]{DATE_OF_ENTRY,TARGET,INTAKE,TEMPERATURE,STATUS}, DATE_OF_ENTRY + " = ?",
+    Cursor cursor = db.query(TABLE_HYDROCARE, new String[]{DATE_OF_ENTRY, TARGET, INTAKE, TEMPERATURE, STATUS}, DATE_OF_ENTRY + " = ?",
         new String[]{date}, null, null, null, null);
     double inTake = 0.0d;
     if (cursor != null) {
@@ -185,13 +165,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     return null;
   }
 
-  public int getWeekSms(int weekday) {
-    String selectQuery = "SELECT  * FROM " + TABLE_HYDROCARE + " where " + DATE_OF_ENTRY + " between datetime( julianday(date(date('now','localtime','-" + weekday + " days'))))and datetime('now','localtime') AND status=1";
-    SQLiteDatabase db = this.getWritableDatabase();
-    Cursor cursor = db.rawQuery(selectQuery, null);
-    return cursor.getCount();
-  }
-
   public int getWeekDay() {
     String selectQuery = "SELECT strftime('%w','now','localtime')";
     SQLiteDatabase db = this.getWritableDatabase();
@@ -199,5 +172,4 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     cursor.moveToFirst();
     return cursor.getInt(0);
   }
-
 }

@@ -8,7 +8,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.javapapers.android.model.HydroCare;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -33,6 +35,25 @@ public class HydroCareActivity extends Activity implements View.OnClickListener 
     setContentView(R.layout.hydro_care);
     SharedPreferences sharedPreferences = getSharedPreferences("hydrocare", MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
+    getWidgets();
+    applyListeners();
+    mTarget.setText("Target: " + target);
+    databaseHandler = new DatabaseHandler(this);
+    Date date = new Date();
+    HelperClass.setAlarm(getApplicationContext(), 0, HelperClass.getAlarmStartTime(new Date()).getTime(), 1000 * 60 * 60 * 2, true);
+    HelperClass.setAlarm(getApplicationContext(), 0, HelperClass.getTemperatureAlarmStartTime(date,false).getTime(), 1000 * 60 * 10, false);
+    getNewProgress(0);
+    getWeekData();
+  }
+
+  private void applyListeners() {
+    mButton_200.setOnClickListener(this);
+    mButton_300.setOnClickListener(this);
+    mButton_400.setOnClickListener(this);
+    mButton_500.setOnClickListener(this);
+  }
+
+  private void getWidgets() {
     mTarget = (TextView) findViewById(R.id.target);
     mRemaining = (TextView) findViewById(R.id.remaining);
     mProgressBar = (ProgressBar) findViewById(R.id.progress);
@@ -40,22 +61,10 @@ public class HydroCareActivity extends Activity implements View.OnClickListener 
     mButton_300 = (Button) findViewById(R.id.button_300);
     mButton_400 = (Button) findViewById(R.id.button_400);
     mButton_500 = (Button) findViewById(R.id.button_500);
-    mButton_200.setOnClickListener(this);
-    mButton_300.setOnClickListener(this);
-    mButton_400.setOnClickListener(this);
-    mButton_500.setOnClickListener(this);
-    mTarget.setText("Target: " + target);
-    databaseHandler = new DatabaseHandler(this);
-    Date date = new Date();
-    HelperClass.setAlarm(getApplicationContext(), 0, HelperClass.getAlarmStartTime(new Date()).getTime(), 1000 * 60 * 60 * 2, true);
-    HelperClass.setAlarm(getApplicationContext(), 0, date.getTime(), 1000 * 60 * 10, false);
-    getNewProgress(0);
   }
 
   @Override
   public void onClick(View view) {
-    double prevIntake = 0;
-    int prevProgress = 0;
     double newProgress = 0;
     switch (view.getId()) {
       case R.id.button_200:
@@ -73,10 +82,15 @@ public class HydroCareActivity extends Activity implements View.OnClickListener 
     }
     mProgressBar.setProgress((int) newProgress);
   }
+  public void getWeekData(){
+    double[] weekIntakes=new double[7];
+    ArrayList<HydroCare> hydroCares=databaseHandler.getCurrentWeek();
+    for(HydroCare hydroCare:hydroCares){
+      weekIntakes[hydroCare.getDateOfEntry().getDay()] =hydroCare.getInTake();
+    }
+  }
 
   private double getNewProgress(int inTake) {
-    int prevProgress;
-    double prevIntake;
     double newProgress;
     double dbInTake = databaseHandler.getInTake(DatabaseHandler.getDateInString());
     Log.d("test11", "prevIntake:" + dbInTake);

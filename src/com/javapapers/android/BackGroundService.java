@@ -155,9 +155,9 @@ public class BackGroundService extends IntentService {
       if (location != null) {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
-        String addr = ConvertPointToLocation(latitude, longitude);
-        Log.d("test22", "address:" + addr);
-        getTemperature(addr);
+        String address = ConvertPointToLocation(latitude, longitude);
+        Log.d("test22", "address:" + address);
+        getTemperature(address);
 
         break;
       }
